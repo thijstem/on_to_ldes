@@ -9,34 +9,7 @@ from .forms import ContactForm
 
 # Create your views here.
 
-def getlink(request):
-    ssl._create_default_https_context = ssl._create_unverified_context
-
-    sparqlQuery = """
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-        PREFIX adms: <http://www.w3.org/ns/adms#>
-        PREFIX prov: <http://www.w3.org/ns/prov#>
-
-        SELECT DISTINCT ?ldes FROM <http://stad.gent/ldes/hva> 
-        WHERE { 
-        ?object adms:identifier ?identifier.
-        ?identifier skos:notation ?objectnumber.
-        FILTER (regex(?objectnumber, "2004-247-616", "i")).
-        ?object prov:generatedAtTime ?time.
-        BIND(URI(concat("https://apidg.gent.be/opendata/adlib2eventstream/v1/hva/objecten?generatedAtTime=", ?time)) AS ?ldes)
-        } ORDER BY DESC(?object)
-        """
-
-    df_sparql = pd.DataFrame()
-    sparql = SPARQL("https://stad.gent/sparql")
-    qlod = sparql.queryAsListOfDicts(sparqlQuery)
-    csv = CSV.toCSV(qlod)
-    df_result = pd.DataFrame([x.split(',') for x in csv.split('\n')])
-    df_sparql = df_sparql.append(df_result, ignore_index=True)
-    table = df_sparql.to_html()
-    return render(request, 'ldes.html', {'table': table})
-
-def contact(request):
+def getldes(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
