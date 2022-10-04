@@ -35,12 +35,15 @@ def getldes(request):
             df_sparql = pd.DataFrame()
             sparql = SPARQL("https://stad.gent/sparql")
             qlod = sparql.queryAsListOfDicts(sparqlQuery)
-            csv = CSV.toCSV(qlod)
-            df_result = pd.DataFrame([x.split(',') for x in csv.split('\n')])
-            df_sparql = df_sparql.append(df_result, ignore_index=True)
-            df_sparql[0] = df_sparql[0].str.replace(r'"', '')
-            ldes = df_sparql[0].iloc[2]
-            return render(request, 'ldes.html', {'ldes': ldes})
+            if qlod == []:
+                return render(request, 'error.html')
+            else:
+                csv = CSV.toCSV(qlod)
+                df_result = pd.DataFrame([x.split(',') for x in csv.split('\n')])
+                df_sparql = df_sparql.append(df_result, ignore_index=True)
+                df_sparql[0] = df_sparql[0].str.replace(r'"', '')
+                ldes = df_sparql[0].iloc[2]
+                return render(request, 'ldes.html', {'ldes': ldes})
 
     form = ContactForm()
     return render(request, 'form.html', {'form':form})
